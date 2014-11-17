@@ -1,0 +1,41 @@
+#!/usr/bin/python
+import Image
+import glob
+import ImageFilter
+import sys
+import argparse
+import pprint
+
+from os.path import isdir
+
+pp = pprint.PrettyPrinter(indent=4)
+
+class SlitLapse:
+	def __init__(self, input_folder="", output_file=""):
+		print("Input folder: %s" % input_folder)
+		print("Input file  : %s" % output_file)
+
+		if input_folder and isdir(input_folder):
+			images_names=[fname for fname in sorted(glob.glob(input_folder+"/*.jpg"))]
+			pp.pprint(images_names)
+			images = [Image.open(fname) for fname in images_names]
+			print("Total images %d" % len(images))
+			band_size = images[0].size[0]/len(images)
+			output = Image.new("RGB",images[0].size)
+			for i in xrange(0,len(images)):
+				box = (i*band_size,0,(i+1)*band_size,images[i].size[1])
+				output.paste(images[i].crop(box),box)
+
+			output.save(output_file)
+
+
+def main(argv):
+	parser=argparse.ArgumentParser(description="Create a slitlapse image from a a set of input images")
+	parser.add_argument('-i', '--input',  help='the input folder',  required=True)
+	parser.add_argument('-o', '--output', help='the output image. Default: out.jpg', default='out.jpg')
+
+	args=parser.parse_args(argv)
+	SlitLapse(input_folder=args.input, output_file=args.output)
+
+if __name__ == "__main__":
+	main(sys.argv[1:])
