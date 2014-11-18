@@ -17,14 +17,17 @@ class SlitLapse:
 
 		if input_folder and isdir(input_folder):
 			images_names=[fname for fname in sorted(glob.glob(input_folder+"/*.jpg"))]
-			pp.pprint(images_names)
-			images = [Image.open(fname) for fname in images_names]
-			print("Total images %d" % len(images))
-			band_size = images[0].size[0]/len(images)
-			output = Image.new("RGB",images[0].size)
-			for i in xrange(0,len(images)):
-				box = (i*band_size,0,(i+1)*band_size,images[i].size[1])
-				output.paste(images[i].crop(box),box)
+			print("Total images %d" % len(images_names))
+			
+			first = Image.open(images_names[0])
+			band_size = first.size[0]/len(images_names)
+			output = Image.new("RGB",first.size)
+			
+			for i in xrange(0,len(images_names)):
+				img = Image.open(images_names[i])
+				box = (i*band_size,0,(i+1)*band_size,img.size[1])
+				output.paste(img.crop(box),box)
+				print("Processed %d/%d" % (i,len(images_names)))
 
 			output.save(output_file)
 
